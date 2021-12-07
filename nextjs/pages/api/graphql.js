@@ -18,6 +18,14 @@ const typeDefs = gql`
     geos: [Geo] @relationship(type: "ABOUT_GEO", direction: OUT)
   }
 
+  extend type Article {
+    similar: [Article] @cypher(statement:"""
+      MATCH (this)-[:HAS_TOPIC]->(:Topic)<-[:HAS_TOPIC]-(rec:Article)
+      WITH rec, COUNT(*) AS num
+      RETURN rec ORDER BY num DESC LIMIT 10
+    """)
+  }
+
   type Author @exclude(operations: [CREATE, UPDATE, DELETE]) {
     name: String!
     articles: [Article] @relationship(type: "BYLINE", direction: IN)
